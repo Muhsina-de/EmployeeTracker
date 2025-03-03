@@ -113,6 +113,20 @@ export const getRoles = async () => {
   }
 };
 
+// Fetch Roles by Department 
+export const getRolesByDepartment = async (department_id) => {
+  const query = 'SELECT * FROM role WHERE department_id = $1';
+  const values = [department_id];
+  
+  try {
+    const { rows } = await pool.query(query, values);
+    return rows; // return roles in the given department
+  } catch (error) {
+    throw new Error('Error fetching roles by department: ' + error.message);
+  }
+}
+
+
 // Fetch all employees with their role details and department details
 export const getEmployeesWithRolesAndDepartments = async () => {
     const query = `
@@ -204,23 +218,7 @@ export const getEmployeesByDepartment = async (department_id) => {
     }
   };
 
-// View sum of salaries of employees in each department
-export const getUtilizedBudgetByDepartment = async () => {
-    const query = `
-      SELECT department.id, department.name, SUM(role.salary) AS utilized_budget
-      FROM employee
-      JOIN role ON employee.role_id = role.id
-      JOIN department ON role.department_id = department.id
-      GROUP BY department.id, department.name
-    `;
-  
-    try {
-      const { rows } = await pool.query(query);
-      return rows; // return the utilized budget of each department
-    } catch (error) {
-      throw new Error('Error fetching utilized budget by department: ' + error.message);
-    }
-  };
+
 
 
 
