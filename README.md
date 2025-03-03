@@ -1,8 +1,4 @@
-Here's a README for your "Employee Tracker" project:
-
----
-
-# 10 SQL: Employee Tracker
+Employee Tracker
 
 ## Description
 
@@ -59,16 +55,23 @@ To get started with the Employee Tracker, follow these steps:
    - Add a role
    - Add an employee
    - Update an employee's role
+   - View Utilized budget by Department
+   - View Employees by Manager
+   - View Employees by Department
+   - Delete Department
+   - Delete Role
+   - Delete Employee
+
 
 3. Select the option you would like to interact with and follow the prompts.
 
-4. For a detailed walkthrough of how to use the application, see the [Walkthrough Video](#walkthrough-video).
+4. For a detailed walkthrough of how to use the application, see the [Walkthrough Video](https://drive.google.com/drive/folders/1GkZiL9WRZa2_x2F28ETpZXVb8_LqZCWD).
 
 ## Walkthrough Video
 
 You can view a walkthrough of the application here:
 
-[![Employee Tracker Walkthrough](./Assets/12-sql-homework-video-thumbnail.png)](https://your-video-link.com)
+[![Employee Tracker Walkthrough](./Assets/EmployeeTrackerThumbnail.png)](https://drive.google.com/drive/folders/1GkZiL9WRZa2_x2F28ETpZXVb8_LqZCWD)
 
 This video demonstrates all of the technical acceptance criteria, showing how the user can interact with the application through the command line, view and update employee data, and more.
 

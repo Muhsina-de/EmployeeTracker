@@ -7,7 +7,11 @@ VALUES
   ('Engineering'),
   ('Marketing'),
   ('HR'),
-  ('Finance');
+  ('Finance'),
+  ('Legal'), 
+  ('IT'), 
+  ('Customer Service'), 
+  ('NULL');
 
 -- Insert data into roles table
 INSERT INTO role (title, salary, department_id)
@@ -21,7 +25,8 @@ VALUES
   ('HR Coordinator', 55000, (SELECT id FROM department WHERE name = 'HR')),
   ('HR Manager', 95000, (SELECT id FROM department WHERE name = 'HR')),
   ('Accountant', 70000, (SELECT id FROM department WHERE name = 'Finance')),
-  ('Finance Manager', 110000, (SELECT id FROM department WHERE name = 'Finance'));
+  ('Finance Manager', 110000, (SELECT id FROM department WHERE name = 'Finance')), 
+  ('Unassigned', 0, (SELECT id FROM department WHERE name = 'NULL'));
 
 -- Insert data into employees table
 -- Note: The manager_id references the employee's manager (an employee can manage others)

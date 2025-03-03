@@ -1,6 +1,6 @@
 import inquirer from 'inquirer';
 import { connectToDb } from './config/connection.js';
-import { addEmployee, addDepartment, addRole, updateEmployeeRole, getEmployeesWithRolesAndDepartments,getEmployees, getDepartments, getRoles, deleteDepartment, deleteRole, deleteEmployee, getUtilizedBudgetByDepartment, getEmployeesByDepartment, getEmployeesByManager, getRolesWithDepartments} from './utils/queries.js';
+import { addEmployee, addDepartment, addRole, updateEmployeeRole, getEmployeesWithRolesAndDepartments,getEmployees, getDepartments, getRoles, deleteDepartment, deleteRole, deleteEmployee, getEmployeesByDepartment, getEmployeesByManager, getRolesWithDepartments, getRolesByDepartment} from './utils/queries.js';
 
 await connectToDb(); // Connect to the database at the start
 
@@ -102,9 +102,10 @@ async function promptDepartmentDetails() {
     const departmentId = await addDepartment(departmentAnswers.name);
     console.log('Department added successfully:', departmentId);
   } catch (error) {
-    console.error('Error adding department:', error.message);
-  }
-}
+        console.error('Error adding department:', error.message);
+      }
+    }
+
 
 // Add role logic
 async function promptRoleDetails() {
@@ -229,6 +230,12 @@ async function viewAllRoles() {
   }
 }
 
+// View Roles by Department 
+async function getRolesByDepart(departmentId) {
+  const roles = await getRolesByDepartment();
+  console.table(roles);
+}
+
 // Update employee role logic
 async function updateEmployeeRoleDetails() {
   const employees = await getEmployees(); // Get employee list
@@ -303,7 +310,7 @@ async function deleteRoleDetails(){
     console.error('Error deleting role:', error.message);
   }
 }
-// Delete Department logic with warning message
+//Delete Department logic with warning and prompt user to reassign the employees to another department, then delete the role and then delete the department
 async function deleteDepart(){
   const departments = await getDepartments(); // Get department list
   const departmentChoices = departments.map(dep => dep.name);
@@ -317,29 +324,31 @@ async function deleteDepart(){
   ]);
   const department = departments.find(dep => dep.name === departmentName);
   try {
-    if (department) {
+    const roles = await getRolesByDepartment(department.id);
+    const employee = await getEmployeesByDepartment(department.id);
+      if(employee.length > 0){
+        console.log('Warning: The department has employees associated with it. Please reassign the employees to another department before deleting the department.');
+        //display employees in the selected department
       const employees = await getEmployeesByDepartment(department.id);
-      if (employees.length > 0) {
-        console.log('Warning: The department has employees. Please reassign them before deleting the department.');
-        console.log('Employees in the department:', employees);
-        console.log('Do you still want to delete the department?');
-        const { confirmDelete } = await inquirer.prompt([
-          {
-            type: 'confirm',
-            name: 'confirmDelete',
-            message: 'Do you want to delete the department?',
-          },
-        ]);
-        if (!confirmDelete)
-        return;
+      console.table(employees);
+      
+               if(roles.length > 0){
+                  console.log('ROLES ASSOCIATED WITH THE DEPARTMENT');
+                  console.log('Warning: The department has roles associated with it. Please reassign the roles to another department before deleting the department.');
+                  //display roles in the selected department
+                  const roles = await getRolesByDepartment(department.id);
+                  console.table(roles);
+                return;
+                }
       }
-    }
-    await deleteDepartment(department.id);
-    console.log('Department deleted successfully.');
-  } catch (error) {
-    console.error('Error deleting department:', error.message);
-  }
+      await deleteDepartment(department.id);
+      console.log('Department deleted successfully.');
+   } 
+      catch (error) {
+        console.error('Cannot delete department:', error.message);
+        }
 }
+
 
 // View Employees by Manager
 async function viewEmployeesByManager() {
@@ -392,24 +401,39 @@ async function viewUtilizedBudgetByDepartment() {
   const departments = await getDepartments(); // Get department list
   const departmentChoices = departments.map(dep => dep.name);
 
-  const { departmentName } = await inquirer.prompt([
-    {
-      type: 'list',
-      name: 'departmentName',
-      message: 'Select a department to view utilized budget:',
-      choices: departmentChoices,
-    },
-  ]);
+      const { departmentName } = await inquirer.prompt([
+        {
+          type: 'list',
+          name: 'departmentName',
+          message: 'Select a department to view utilized budget:',
+          choices: departmentChoices,
+        },
+      ]);
 
-  const department = departments.find(dep => dep.name === departmentName);
+      const department = departments.find(dep => dep.name === departmentName);
 
-  try {
-    const budget = await getUtilizedBudgetByDepartment(department.id);
-    console.log(`The utilized budget for ${departmentName} is $${budget}`);
-  } catch (error) {
-    console.error('Error fetching utilized budget by department:', error.message);
+      try {
+        //fetch utilized budget from role table and sum it up
+        const roles = await getRolesByDepartment(department.id);
+let budget = 0;
+
+roles.forEach(role => {
+  // Ensure that salary is treated as a number (parse if necessary)
+  const salary = parseFloat(role.salary);  // Converts salary to a number
+  if (!isNaN(salary)) {
+    budget += salary; // Add salary to budget
+  } else {
+    console.log(`Invalid salary value: ${role.salary}`);
   }
+});
+
+console.log(`The utilized budget for ${departmentName} is $${budget}`);
+      
+      } catch (error) {
+        console.error('Error fetching utilized budget by department:', error.message);
+      }
 }
 
+
 // Start prompting when the script is run
-startPrompting();
+await startPrompting();
